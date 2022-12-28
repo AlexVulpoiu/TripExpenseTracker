@@ -1,4 +1,4 @@
-package com.unibuc.fmi.tripexpensetracker;
+package com.unibuc.fmi.tripexpensetracker.controller;
 
 import com.unibuc.fmi.tripexpensetracker.dto.JwtResponseDto;
 import com.unibuc.fmi.tripexpensetracker.dto.LoginRequestDto;
@@ -9,6 +9,7 @@ import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
 import com.unibuc.fmi.tripexpensetracker.security.jwt.JwtUtils;
 import com.unibuc.fmi.tripexpensetracker.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,8 +40,13 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
 
+        Optional<User> user = userRepository.findByEmail(loginRequestDto.getEmail());
+        if(user.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponseDto("Bad credentials"), HttpStatus.UNAUTHORIZED);
+        }
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(user.get().getUsername(), loginRequestDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -70,6 +77,7 @@ public class AuthController {
         User user = User.builder().username(signupRequestDto.getUsername()).email(
                 signupRequestDto.getEmail()).
                 password(encoder.encode(signupRequestDto.getPassword())).build();
+        userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponseDto("User registered successfully!"));
     }
