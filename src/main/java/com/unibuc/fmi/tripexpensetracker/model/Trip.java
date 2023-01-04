@@ -3,9 +3,9 @@ package com.unibuc.fmi.tripexpensetracker.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
 import java.util.List;
 
 @Data
@@ -15,29 +15,22 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(	name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email")
-        })
-public class User {
+@Table(	name = "trips")
+public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
     @Size(max = 20)
-    private String username;
+    private String title;
 
     @NotBlank
-    @Size(max = 50)
-    @Email
-    private String email;
+    @Size(max = 30)
+    private String location;
 
-    @NotBlank
-    @Size(max = 120)
-    private String password;
+    private Float group_expense = 0.0F;
 
 //    @ManyToMany
-//    private List<Trip> trips;
+//    private List<User> users;
 }
