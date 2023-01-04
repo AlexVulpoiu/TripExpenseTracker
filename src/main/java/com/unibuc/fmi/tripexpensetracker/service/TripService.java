@@ -34,4 +34,16 @@ public class TripService {
 
         return ResponseEntity.ok(new MessageResponseDto("Trip added successfully!"));
     }
+
+    public ResponseEntity<?> deleteTrip(Long id) {
+        if (!tripRepository.existsById(id)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Trip does not exist!"));
+        }
+        tripRepository.deleteById(id);
+        return ResponseEntity.ok(new MessageResponseDto("Trip deleted successfully!"));
+    }
+
+
 }
