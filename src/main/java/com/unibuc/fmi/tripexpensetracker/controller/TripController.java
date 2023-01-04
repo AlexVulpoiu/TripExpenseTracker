@@ -7,6 +7,7 @@ import com.unibuc.fmi.tripexpensetracker.dto.TripRequestDto;
 import com.unibuc.fmi.tripexpensetracker.model.Trip;
 import com.unibuc.fmi.tripexpensetracker.model.User;
 import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
+import com.unibuc.fmi.tripexpensetracker.service.TripService;
 import com.unibuc.fmi.tripexpensetracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,19 +21,21 @@ import javax.validation.Valid;
 public class TripController {
 
     @Autowired
-    TripRepository tripRepository;
+    private final TripService tripService;
+
+    @Autowired
+    public TripController(TripService tripService) {
+        this.tripService = tripService;
+    }
 
     @PostMapping("/add")
     public ResponseEntity<?> addTrip(@Valid @RequestBody TripRequestDto tripRequestDto) {
+        return tripService.addTrip(tripRequestDto);
+    }
 
-        // Create new trip's account
-        Trip trip = Trip.builder()
-                .title(tripRequestDto.getTitle())
-                .location(tripRequestDto.getLocation())
-                .group_expense(tripRequestDto.getGroup_expense())
-                .build();
-        tripRepository.save(trip);
-
-        return ResponseEntity.ok(new MessageResponseDto("Trip added successfully!"));
+    @DeleteMapping("/trips/{id}")
+    public ResponseEntity<?> deleteTrip(@PathVariable Long id){
+//        tripService.deleteById(2L);
+        return ResponseEntity.ok().build();
     }
 }
