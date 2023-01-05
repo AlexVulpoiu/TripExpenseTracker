@@ -1,5 +1,7 @@
 package com.unibuc.fmi.tripexpensetracker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,12 +11,11 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
-@Getter
-@Setter
 @Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(	name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username"),
@@ -38,6 +39,7 @@ public class User {
     @Size(max = 120)
     private String password;
 
-//    @ManyToMany
-//    private List<Trip> trips;
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserTrip> trips;
 }

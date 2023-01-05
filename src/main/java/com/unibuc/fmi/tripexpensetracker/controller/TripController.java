@@ -1,16 +1,9 @@
 package com.unibuc.fmi.tripexpensetracker.controller;
 
-import com.unibuc.fmi.tripexpensetracker.repository.TripRepository;
-import com.unibuc.fmi.tripexpensetracker.dto.MessageResponseDto;
-import com.unibuc.fmi.tripexpensetracker.dto.SignupRequestDto;
+import com.unibuc.fmi.tripexpensetracker.dto.NewTripUsersDto;
 import com.unibuc.fmi.tripexpensetracker.dto.TripRequestDto;
-import com.unibuc.fmi.tripexpensetracker.model.Trip;
-import com.unibuc.fmi.tripexpensetracker.model.User;
-import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
 import com.unibuc.fmi.tripexpensetracker.service.TripService;
-import com.unibuc.fmi.tripexpensetracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,5 +29,15 @@ public class TripController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTrip(@PathVariable Long id){
         return tripService.deleteTrip(id);
+    }
+
+    @PostMapping("/{tripId}/addUsers")
+    public ResponseEntity<?> addUsersToTrip(@PathVariable Long tripId, @Valid @RequestBody NewTripUsersDto newTripUsersDto) {
+        return tripService.addUsersToTrip(tripId, newTripUsersDto);
+    }
+
+    @GetMapping("/{tripId}")
+    public ResponseEntity<?> getTripDetails(@PathVariable Long tripId) {
+        return tripService.getTripDetails(tripId);
     }
 }

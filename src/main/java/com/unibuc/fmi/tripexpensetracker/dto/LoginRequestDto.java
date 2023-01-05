@@ -8,8 +8,7 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 
 @Data
-@Getter
-@Setter
+
 @Builder
 public class LoginRequestDto {
 
