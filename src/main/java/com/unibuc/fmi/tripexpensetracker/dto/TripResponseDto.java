@@ -1,19 +1,22 @@
 package com.unibuc.fmi.tripexpensetracker.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.unibuc.fmi.tripexpensetracker.model.User;
+import com.unibuc.fmi.tripexpensetracker.model.UserTrip;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
-public class TripRequestDto {
-
+@AllArgsConstructor
+@NoArgsConstructor
+public class TripResponseDto {
     @NotBlank
     private String title;
 
@@ -25,4 +28,7 @@ public class TripRequestDto {
 
     @NotNull
     private LocalDate endDate;
+
+    @NotNull
+    private List<UserDto> usersDto;
 }
