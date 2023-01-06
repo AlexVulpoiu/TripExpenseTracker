@@ -203,4 +203,15 @@ public class TripService {
         return ResponseEntity.ok(new MessageResponseDto("Individual spending for user added to trip!"));
     }
 
+    public ResponseEntity<?> deleteIndividualSpending(Long spendingId) {
+
+        if (!spendingRepository.existsById(spendingId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Spending does not exist!"));
+        }
+        spendingRepository.deleteById(spendingId);
+        return ResponseEntity.ok(new MessageResponseDto("Spending deleted from trip successfully!"));
+    }
+
 }

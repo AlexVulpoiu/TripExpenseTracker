@@ -52,4 +52,9 @@ public class TripController {
         return tripService.addIndividualSpending(tripId, userId, individualSpendingRequestDto);
     }
 
+    @DeleteMapping("/deleteIndividualSpending/{spendingId}")
+    public ResponseEntity<?> deleteIndividualSpending(@PathVariable Long spendingId){
+        return tripService.deleteIndividualSpending(spendingId);
+    };
+
 }
