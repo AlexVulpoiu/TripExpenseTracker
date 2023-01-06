@@ -167,6 +167,18 @@ public class TripService {
 
     public ResponseEntity<?> addIndividualSpending(@PathVariable Long tripId, @PathVariable Long userId, @Valid @RequestBody IndividualSpendingRequestDto individualSpendingRequestDto) {
 
+        if (!tripRepository.existsById(tripId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Trip does not exist!"));
+        }
+
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: User does not exist!"));
+        }
+
         UserTripId userTripId = UserTripId.builder()
                 .tripId(tripId)
                 .userId(userId)
