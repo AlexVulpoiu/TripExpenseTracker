@@ -91,7 +91,7 @@ public class TripService {
                         .trip(trip.get())
                         .build();
                 userTripRepository.save(userTrip);
-                trip.get().addUserToTrip(user.get(), userTrip);
+//                trip.get().addUserToTrip(user.get(), userTrip);
             }
 
         }
