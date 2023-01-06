@@ -1,10 +1,8 @@
 package com.unibuc.fmi.tripexpensetracker.service;
 
 import com.unibuc.fmi.tripexpensetracker.dto.*;
-import com.unibuc.fmi.tripexpensetracker.model.Trip;
-import com.unibuc.fmi.tripexpensetracker.model.User;
-import com.unibuc.fmi.tripexpensetracker.model.UserTrip;
-import com.unibuc.fmi.tripexpensetracker.model.UserTripId;
+import com.unibuc.fmi.tripexpensetracker.model.*;
+import com.unibuc.fmi.tripexpensetracker.repository.SpendingRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.TripRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.UserTripRepository;
@@ -13,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +26,14 @@ public class TripService {
 
     private final UserTripRepository userTripRepository;
 
+    private final SpendingRepository spendingRepository;
+
     @Autowired
-    public TripService(TripRepository tripRepository, UserRepository userRepository, UserTripRepository userTripRepository) {
+    public TripService(TripRepository tripRepository, UserRepository userRepository, UserTripRepository userTripRepository, SpendingRepository spendingRepository) {
         this.tripRepository = tripRepository;
         this.userRepository = userRepository;
         this.userTripRepository = userTripRepository;
+        this.spendingRepository = spendingRepository;
     }
 
     public ResponseEntity<?> addTrip(TripRequestDto tripRequestDto) {
@@ -72,8 +75,6 @@ public class TripService {
                         .body(new MessageResponseDto("Error: User does not exist!"));
             }
         }
-
-
 
         for (Long userId : userIds) {
             UserTripId userTripId = UserTripId.builder()
@@ -145,7 +146,6 @@ public class TripService {
                     .body(new MessageResponseDto("Error: User does not exist!"));
         }
 
-
         UserTripId userTripId = UserTripId.builder()
                 .userId(userId)
                 .tripId(tripId)
@@ -162,6 +162,45 @@ public class TripService {
 
 
         return ResponseEntity.ok(new MessageResponseDto("User deleted from trip successfully!"));
+    }
+
+
+    public ResponseEntity<?> addIndividualSpending(@PathVariable Long tripId, @PathVariable Long userId, @Valid @RequestBody IndividualSpendingRequestDto individualSpendingRequestDto) {
+
+        if (!tripRepository.existsById(tripId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Trip does not exist!"));
+        }
+
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: User does not exist!"));
+        }
+
+        UserTripId userTripId = UserTripId.builder()
+                .tripId(tripId)
+                .userId(userId)
+                .build();
+
+        Optional<User> user = userRepository.findById(userId);
+        Optional<Trip> trip = tripRepository.findById(tripId);
+
+        UserTrip userTrip = UserTrip.builder()
+                .id(userTripId)
+                .user(user.get())
+                .trip(trip.get())
+                .build();
+
+        Spending spending = Spending.builder()
+                .userTrip(userTrip)
+                .amount(individualSpendingRequestDto.getAmount())
+                .type(individualSpendingRequestDto.getType())
+                .build();
+
+        spendingRepository.save(spending);
+        return ResponseEntity.ok(new MessageResponseDto("Individual spending for user added to trip!"));
     }
 
 }
