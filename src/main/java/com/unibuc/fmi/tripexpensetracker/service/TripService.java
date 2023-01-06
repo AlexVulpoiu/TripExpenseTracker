@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +129,39 @@ public class TripService {
                 .build();
 
         return new ResponseEntity<>( tripResponseDto, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> deleteUserFromTrip(@PathVariable Long tripId, @PathVariable Long userId) {
+        
+        if (!tripRepository.existsById(tripId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Trip does not exist!"));
+        }
+
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: User does not exist!"));
+        }
+
+
+        UserTripId userTripId = UserTripId.builder()
+                .userId(userId)
+                .tripId(tripId)
+                .build();
+        Optional<UserTrip> optionalUserTrip = userTripRepository.getUserTripById(userTripId);
+
+        if (optionalUserTrip.isEmpty()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: The user is not in this trip!"));
+        }
+
+        userTripRepository.deleteById(optionalUserTrip.get().getId());
+
+
+        return ResponseEntity.ok(new MessageResponseDto("User deleted from trip successfully!"));
     }
 
 }
