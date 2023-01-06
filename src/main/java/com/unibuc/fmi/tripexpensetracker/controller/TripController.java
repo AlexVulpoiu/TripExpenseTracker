@@ -40,4 +40,9 @@ public class TripController {
     public ResponseEntity<?> getTripDetails(@PathVariable Long tripId) {
         return tripService.getTripDetails(tripId);
     }
+
+    @DeleteMapping("/{tripId}/deleteUser/{userId}")
+    public ResponseEntity<?> deleteUserFromTrip(@PathVariable Long tripId, @PathVariable Long userId){
+        return tripService.deleteUserFromTrip(tripId, userId);
+    };
 }
