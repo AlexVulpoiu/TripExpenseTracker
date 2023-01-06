@@ -1,5 +1,6 @@
 package com.unibuc.fmi.tripexpensetracker.controller;
 
+import com.unibuc.fmi.tripexpensetracker.dto.IndividualSpendingRequestDto;
 import com.unibuc.fmi.tripexpensetracker.dto.NewTripUsersDto;
 import com.unibuc.fmi.tripexpensetracker.dto.TripRequestDto;
 import com.unibuc.fmi.tripexpensetracker.service.TripService;
@@ -45,4 +46,10 @@ public class TripController {
     public ResponseEntity<?> deleteUserFromTrip(@PathVariable Long tripId, @PathVariable Long userId){
         return tripService.deleteUserFromTrip(tripId, userId);
     };
+
+    @PostMapping("/{tripId}/{userId}/addIndividualSpending")
+    public ResponseEntity<?> addIndividualSpending(@PathVariable Long tripId, @PathVariable Long userId, @Valid @RequestBody IndividualSpendingRequestDto individualSpendingRequestDto) {
+        return tripService.addIndividualSpending(tripId, userId, individualSpendingRequestDto);
+    }
+
 }
