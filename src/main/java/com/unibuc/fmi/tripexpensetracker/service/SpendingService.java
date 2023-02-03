@@ -2,14 +2,15 @@ package com.unibuc.fmi.tripexpensetracker.service;
 
 import com.unibuc.fmi.tripexpensetracker.dto.*;
 import com.unibuc.fmi.tripexpensetracker.model.*;
+import com.unibuc.fmi.tripexpensetracker.notification.notifications.AddedToSpendingNotification;
+import com.unibuc.fmi.tripexpensetracker.notification.notifications.RemovedFromSpendingNotification;
+import com.unibuc.fmi.tripexpensetracker.notification.notifications.SpendingUpdatedNotification;
 import com.unibuc.fmi.tripexpensetracker.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SpendingService {
@@ -71,6 +72,41 @@ public class SpendingService {
     }
 
     private void syncSpendingGroup(Spending spending, List<User> users) {
+        List<User> participants = spending.getParticipants().stream().map(SpendingGroup::getUser).toList();
+        Set<User> previous = new HashSet<>(participants);
+        Set<User> current = new HashSet<>(users);
+        previous.removeAll(current);
+
+        for (User removedUser : previous) {
+            new RemovedFromSpendingNotification(
+                    spending.getUserTrip().getUser(),
+                    removedUser,
+                    spending
+            );
+        }
+
+        previous = new HashSet<>(participants);
+        current.removeAll(previous);
+
+        for (User addedUser : current) {
+            new AddedToSpendingNotification(
+                    spending.getUserTrip().getUser(),
+                    addedUser,
+                    spending
+            );
+        }
+
+        current = new HashSet<>(users);
+        current.retainAll(previous);
+
+        for (User user : current) {
+            new SpendingUpdatedNotification(
+                    spending.getUserTrip().getUser(),
+                    user,
+                    spending
+            );
+        }
+
         if (spending.getParticipants() != null) {
             spendingGroupRepository.deleteAllInBatch(spending.getParticipants());
         }
