@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SpendingService {
@@ -72,7 +73,7 @@ public class SpendingService {
     }
 
     private void syncSpendingGroup(Spending spending, List<User> users) {
-        List<User> participants = spending.getParticipants().stream().map(SpendingGroup::getUser).toList();
+        List<User> participants = spending.getParticipants().stream().map(SpendingGroup::getUser).collect(Collectors.toList());;
         Set<User> previous = new HashSet<>(participants);
         Set<User> current = new HashSet<>(users);
         previous.removeAll(current);
