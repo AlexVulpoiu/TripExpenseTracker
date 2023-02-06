@@ -10,8 +10,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class UserTripId implements Serializable {
+public class SpendingGroupId implements Serializable {
     private Long userId;
 
-    private Long tripId;
+    private Long spendingId;
 }

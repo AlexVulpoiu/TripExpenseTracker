@@ -2,6 +2,7 @@ package com.unibuc.fmi.tripexpensetracker.service;
 
 import com.unibuc.fmi.tripexpensetracker.dto.*;
 import com.unibuc.fmi.tripexpensetracker.model.*;
+import com.unibuc.fmi.tripexpensetracker.notification.notifications.AddedToSpendingNotification;
 import com.unibuc.fmi.tripexpensetracker.repository.SpendingRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.TripRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
@@ -11,9 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +36,8 @@ public class TripService {
         this.spendingRepository = spendingRepository;
     }
 
-    public ResponseEntity<?> addTrip(TripRequestDto tripRequestDto) {
+    public ResponseEntity<?> addTrip(Long userId, TripRequestDto tripRequestDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
 
         Trip trip = Trip.builder()
                 .title(tripRequestDto.getTitle())
@@ -44,7 +45,13 @@ public class TripService {
                 .startDate(tripRequestDto.getStartDate())
                 .endDate(tripRequestDto.getEndDate())
                 .build();
-        tripRepository.save(trip);
+        Trip newTrip = tripRepository.save(trip);
+
+        UserTrip userTrip = UserTrip.builder()
+                .user(user)
+                .trip(newTrip)
+                .build();
+        userTripRepository.save(userTrip);
 
         return ResponseEntity.ok(new MessageResponseDto("Trip added successfully!"));
     }
@@ -55,52 +62,56 @@ public class TripService {
                     .badRequest()
                     .body(new MessageResponseDto("Error: Trip does not exist!"));
         }
+
         tripRepository.deleteById(id);
         return ResponseEntity.ok(new MessageResponseDto("Trip deleted successfully!"));
     }
 
     public ResponseEntity<?> addUsersToTrip(Long tripId, NewTripUsersDto newTripUsersDto) {
-        if (!tripRepository.existsById(tripId)) {
+        Optional<Trip> trip = tripRepository.findById(tripId);
+
+        if (trip.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponseDto("Error: Trip does not exist!"));
         }
 
         List<Long> userIds = newTripUsersDto.getUsers();
+        List<User> users = new ArrayList<>();
 
         for (Long userId : userIds) {
-            if (!userRepository.existsById(userId)) {
+            Optional<User> user = userRepository.findById(userId);
+
+            if (user.isEmpty()) {
                 return ResponseEntity
                         .badRequest()
                         .body(new MessageResponseDto("Error: User does not exist!"));
             }
+
+            users.add(user.get());
         }
 
-        for (Long userId : userIds) {
-            UserTripId userTripId = UserTripId.builder()
-                            .tripId(tripId)
-                            .userId(userId)
-                            .build();
+        for (User user : users) {
 
-            Optional<User> user = userRepository.findById(userId);
-            Optional<Trip> trip = tripRepository.findById(tripId);
-
-            if(!userTripRepository.existsById(userTripId)) {
+            if (userTripRepository.findByUserAndTrip(user, trip.get()).isEmpty()) {
                 UserTrip userTrip = UserTrip.builder()
-                        .id(userTripId)
-                        .user(user.get())
+                        .user(user)
                         .trip(trip.get())
                         .build();
                 userTripRepository.save(userTrip);
-//                trip.get().addUserToTrip(user.get(), userTrip);
             }
-
         }
 
         return ResponseEntity.ok(new MessageResponseDto("User added to trip successfully!"));
     }
 
     public ResponseEntity<?> getTripDetails(Long tripId) {
+
+        new AddedToSpendingNotification(
+                this.userRepository.findById(1L).get(),
+                this.userRepository.findById(2L).get(),
+                this.spendingRepository.findById(1L).get()
+        ).dispatch();
 
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
 
@@ -129,28 +140,26 @@ public class TripService {
                 .usersDto(usersDto)
                 .build();
 
-        return new ResponseEntity<>( tripResponseDto, HttpStatus.OK);
+        return new ResponseEntity<>(tripResponseDto, HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteUserFromTrip(@PathVariable Long tripId, @PathVariable Long userId) {
-        
-        if (!tripRepository.existsById(tripId)) {
+        Optional<Trip> trip = tripRepository.findById(tripId);
+        Optional<User> user = userRepository.findById(userId);
+
+        if (trip.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponseDto("Error: Trip does not exist!"));
         }
 
-        if (!userRepository.existsById(userId)) {
+        if (user.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponseDto("Error: User does not exist!"));
         }
 
-        UserTripId userTripId = UserTripId.builder()
-                .userId(userId)
-                .tripId(tripId)
-                .build();
-        Optional<UserTrip> optionalUserTrip = userTripRepository.getUserTripById(userTripId);
+        Optional<UserTrip> optionalUserTrip = userTripRepository.findByUserAndTrip(user.get(), trip.get());
 
         if (optionalUserTrip.isEmpty()) {
             return ResponseEntity
@@ -160,58 +169,6 @@ public class TripService {
 
         userTripRepository.deleteById(optionalUserTrip.get().getId());
 
-
         return ResponseEntity.ok(new MessageResponseDto("User deleted from trip successfully!"));
     }
-
-
-    public ResponseEntity<?> addIndividualSpending(@PathVariable Long tripId, @PathVariable Long userId, @Valid @RequestBody IndividualSpendingRequestDto individualSpendingRequestDto) {
-
-        if (!tripRepository.existsById(tripId)) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponseDto("Error: Trip does not exist!"));
-        }
-
-        if (!userRepository.existsById(userId)) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponseDto("Error: User does not exist!"));
-        }
-
-        UserTripId userTripId = UserTripId.builder()
-                .tripId(tripId)
-                .userId(userId)
-                .build();
-
-        Optional<User> user = userRepository.findById(userId);
-        Optional<Trip> trip = tripRepository.findById(tripId);
-
-        UserTrip userTrip = UserTrip.builder()
-                .id(userTripId)
-                .user(user.get())
-                .trip(trip.get())
-                .build();
-
-        Spending spending = Spending.builder()
-                .userTrip(userTrip)
-                .amount(individualSpendingRequestDto.getAmount())
-                .type(individualSpendingRequestDto.getType())
-                .build();
-
-        spendingRepository.save(spending);
-        return ResponseEntity.ok(new MessageResponseDto("Individual spending for user added to trip!"));
-    }
-
-    public ResponseEntity<?> deleteIndividualSpending(Long spendingId) {
-
-        if (!spendingRepository.existsById(spendingId)) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponseDto("Error: Spending does not exist!"));
-        }
-        spendingRepository.deleteById(spendingId);
-        return ResponseEntity.ok(new MessageResponseDto("Spending deleted from trip successfully!"));
-    }
-
 }

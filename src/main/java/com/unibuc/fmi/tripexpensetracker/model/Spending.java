@@ -20,6 +20,10 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "spendings")
 public class Spending {
+
+    public static final String TYPE_INDIVIDUAL = "individual";
+    public static final String TYPE_GROUP = "group";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,6 +34,10 @@ public class Spending {
     @NotBlank
     private String type;
 
-    @ManyToOne(fetch= FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private UserTrip userTrip;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "spending", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SpendingGroup> participants;
 }
