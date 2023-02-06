@@ -3,7 +3,6 @@ package com.unibuc.fmi.tripexpensetracker.notification.channels;
 import com.unibuc.fmi.tripexpensetracker.dto.notification.NotificationDto;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 public class MailNotificationChannel extends NotificationChannelDecorator {
 
@@ -11,7 +10,6 @@ public class MailNotificationChannel extends NotificationChannelDecorator {
 
     public MailNotificationChannel(BaseChannel source) {
         super(source);
-        mailSender = new JavaMailSenderImpl();
     }
 
     protected void sendMail(NotificationDto message) {
@@ -21,7 +19,7 @@ public class MailNotificationChannel extends NotificationChannelDecorator {
         msg.setSubject(message.getSubject());
         msg.setText(message.getMessage());
 
-        mailSender.send(msg);
+        // mailSender.send(msg);
     }
 
     @Override

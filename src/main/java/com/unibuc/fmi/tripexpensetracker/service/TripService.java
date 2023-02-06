@@ -2,6 +2,7 @@ package com.unibuc.fmi.tripexpensetracker.service;
 
 import com.unibuc.fmi.tripexpensetracker.dto.*;
 import com.unibuc.fmi.tripexpensetracker.model.*;
+import com.unibuc.fmi.tripexpensetracker.notification.notifications.AddedToSpendingNotification;
 import com.unibuc.fmi.tripexpensetracker.repository.SpendingRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.TripRepository;
 import com.unibuc.fmi.tripexpensetracker.repository.UserRepository;
@@ -97,6 +98,12 @@ public class TripService {
     }
 
     public ResponseEntity<?> getTripDetails(Long tripId) {
+
+        new AddedToSpendingNotification(
+                this.userRepository.findById(1L).get(),
+                this.userRepository.findById(2L).get(),
+                this.spendingRepository.findById(1L).get()
+        ).dispatch();
 
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
 
