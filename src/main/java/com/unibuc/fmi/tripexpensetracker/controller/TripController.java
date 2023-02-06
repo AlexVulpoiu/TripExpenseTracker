@@ -34,8 +34,8 @@ public class TripController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addTrip(@Valid @RequestBody TripRequestDto tripRequestDto) {
-        return tripService.addTrip(tripRequestDto);
+    public ResponseEntity<?> addTrip(Principal principal, @Valid @RequestBody TripRequestDto tripRequestDto) {
+        return tripService.addTrip(((UserDetailsImpl) ((UsernamePasswordAuthenticationToken)principal).getPrincipal()).getId(), tripRequestDto);
     }
 
     @DeleteMapping("/{id}")

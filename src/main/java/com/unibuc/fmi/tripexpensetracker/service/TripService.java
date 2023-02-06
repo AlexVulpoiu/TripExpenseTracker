@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,8 @@ public class TripService {
         this.spendingRepository = spendingRepository;
     }
 
-    public ResponseEntity<?> addTrip(TripRequestDto tripRequestDto) {
+    public ResponseEntity<?> addTrip(Long userId, TripRequestDto tripRequestDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
 
         Trip trip = Trip.builder()
                 .title(tripRequestDto.getTitle())
@@ -43,7 +45,13 @@ public class TripService {
                 .startDate(tripRequestDto.getStartDate())
                 .endDate(tripRequestDto.getEndDate())
                 .build();
-        tripRepository.save(trip);
+        Trip newTrip = tripRepository.save(trip);
+
+        UserTrip userTrip = UserTrip.builder()
+                .user(user)
+                .trip(newTrip)
+                .build();
+        userTripRepository.save(userTrip);
 
         return ResponseEntity.ok(new MessageResponseDto("Trip added successfully!"));
     }

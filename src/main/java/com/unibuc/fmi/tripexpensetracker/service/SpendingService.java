@@ -55,7 +55,18 @@ public class SpendingService {
                 .type(Spending.TYPE_INDIVIDUAL)
                 .build();
 
-        spendingRepository.save(spending);
+        spending = spendingRepository.save(spending);
+
+        SpendingGroupId spendingGroupId = SpendingGroupId.builder()
+                .userId(user.getId())
+                .spendingId(spending.getId())
+                .build();
+        SpendingGroup spendingGroup = SpendingGroup.builder()
+                .id(spendingGroupId)
+                .spending(spending)
+                .user(user)
+                .build();
+        spendingGroupRepository.save(spendingGroup);
 
         return ResponseEntity.ok(new MessageResponseDto("Individual spending for user added to trip!"));
     }
@@ -167,6 +178,20 @@ public class SpendingService {
                 .build();
 
         spending = spendingRepository.save(spending);
+
+        for (User user1 : users) {
+            SpendingGroupId spendingGroupId = SpendingGroupId.builder()
+                    .userId(user1.getId())
+                    .spendingId(spending.getId())
+                    .build();
+            SpendingGroup spendingGroup = SpendingGroup.builder()
+                    .id(spendingGroupId)
+                    .user(user1)
+                    .spending(spending)
+                    .build();
+            spendingGroupRepository.save(spendingGroup);
+        }
+
         this.syncSpendingGroup(spending, users);
 
         return ResponseEntity.ok(new MessageResponseDto("Group spending added to trip!"));
