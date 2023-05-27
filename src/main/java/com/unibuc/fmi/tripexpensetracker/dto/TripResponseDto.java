@@ -1,7 +1,5 @@
 package com.unibuc.fmi.tripexpensetracker.dto;
 
-import com.unibuc.fmi.tripexpensetracker.model.User;
-import com.unibuc.fmi.tripexpensetracker.model.UserTrip;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
