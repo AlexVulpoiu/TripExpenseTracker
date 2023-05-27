@@ -171,4 +171,40 @@ public class TripService {
 
         return ResponseEntity.ok(new MessageResponseDto("User deleted from trip successfully!"));
     }
+
+    public ResponseEntity<?> getTripsForUser(Long userId) {
+        List<Trip> trips = userTripRepository.findTripsByUserId(userId);
+        List<TripResponseDto> tripDtoList = new ArrayList<>();
+        trips.forEach(trip -> {
+            List<Long> userIds = new ArrayList<>();
+            for (UserTrip userTrip : trip.getUsers()) {
+                userIds.add(userTrip.getUser().getId());
+            }
+
+            List<UserDto> userDtoList = new ArrayList<>();
+            List<User> users = userRepository.findByIdIn(userIds);
+            for (User user : users) {
+                if (!user.getId().equals(userId)) {
+                    userDtoList.add(
+                            UserDto.builder()
+                                    .id(user.getId())
+                                    .email(user.getEmail())
+                                    .username(user.getUsername())
+                                    .build()
+                    );
+                }
+            }
+
+            TripResponseDto tripDto = TripResponseDto.builder()
+                    .id(trip.getId())
+                    .title(trip.getTitle())
+                    .location(trip.getLocation())
+                    .startDate(trip.getStartDate())
+                    .endDate(trip.getEndDate())
+                    .usersDto(userDtoList)
+                    .build();
+            tripDtoList.add(tripDto);
+        });
+        return new ResponseEntity<>(tripDtoList, HttpStatus.OK);
+    }
 }

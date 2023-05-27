@@ -1,5 +1,6 @@
 package com.unibuc.fmi.tripexpensetracker.repository;
 
+import com.unibuc.fmi.tripexpensetracker.dto.UserDto;
 import com.unibuc.fmi.tripexpensetracker.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

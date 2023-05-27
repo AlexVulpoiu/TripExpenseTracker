@@ -11,12 +11,13 @@ import com.unibuc.fmi.tripexpensetracker.service.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
 
+
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/trips")
 public class TripController {
@@ -31,6 +32,11 @@ public class TripController {
     public TripController(TripService tripService, SpendingService spendingService) {
         this.tripService = tripService;
         this.spendingService = spendingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getTripsForUser(Principal principal) {
+        return tripService.getTripsForUser(((UserDetailsImpl) ((UsernamePasswordAuthenticationToken)principal).getPrincipal()).getId());
     }
 
     @PostMapping("/add")

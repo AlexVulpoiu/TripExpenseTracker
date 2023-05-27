@@ -163,6 +163,7 @@ public class SpendingService {
             );
         }
 
+        userIds.add(user.getId());
         List<User> users = userRepository.findByIdIn(userIds);
 
         if (users.size() != userIds.size()) {
@@ -178,6 +179,7 @@ public class SpendingService {
                 .build();
 
         spending = spendingRepository.save(spending);
+        List<SpendingGroup> spendingGroupList = new ArrayList<>();
 
         for (User user1 : users) {
             SpendingGroupId spendingGroupId = SpendingGroupId.builder()
@@ -190,9 +192,11 @@ public class SpendingService {
                     .spending(spending)
                     .build();
             spendingGroupRepository.save(spendingGroup);
+            spendingGroupList.add(spendingGroup);
         }
 
-        this.syncSpendingGroup(spending, users);
+        spending.setParticipants(spendingGroupList);
+        spendingRepository.save(spending);
 
         return ResponseEntity.ok(new MessageResponseDto("Group spending added to trip!"));
     }

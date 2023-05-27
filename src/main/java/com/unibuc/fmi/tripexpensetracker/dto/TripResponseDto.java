@@ -17,6 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TripResponseDto {
+
+    private Long id;
+
     @NotBlank
     private String title;
 
