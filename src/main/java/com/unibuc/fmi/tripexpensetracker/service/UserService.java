@@ -31,6 +31,7 @@ public class UserService {
 
     private UserDto mapUserToUserDto(User user) {
         return UserDto.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .build();

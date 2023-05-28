@@ -120,6 +120,7 @@ public class TripService {
         for (UserTrip userTrip : trip.getUsers()) {
             User user = userTrip.getUser();
             UserDto userDto = UserDto.builder()
+                    .id(user.getId())
                     .email(user.getEmail())
                     .username(user.getUsername())
                     .build();
@@ -127,6 +128,7 @@ public class TripService {
         }
 
         TripResponseDto tripResponseDto = TripResponseDto.builder()
+                .id(trip.getId())
                 .title(trip.getTitle())
                 .location(trip.getLocation())
                 .startDate(trip.getStartDate())
