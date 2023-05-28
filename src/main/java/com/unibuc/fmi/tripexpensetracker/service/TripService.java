@@ -107,12 +107,6 @@ public class TripService {
 
     public ResponseEntity<?> getTripDetails(Long tripId) {
 
-        new AddedToSpendingNotification(
-                this.userRepository.findById(1L).get(),
-                this.userRepository.findById(2L).get(),
-                this.spendingRepository.findById(1L).get()
-        ).dispatch();
-
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
 
         if (optionalTrip.isEmpty()) {
